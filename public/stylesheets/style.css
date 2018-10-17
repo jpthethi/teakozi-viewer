@@ -1,0 +1,41 @@
+body {
+}
+
+a {
+  color: #00B7FF;
+}
+
+.bullet {
+  width:16px;
+  height:16px;
+  border-radius: 50%;
+  display: inline-block;
+  background-color: yellow
+}
+
+.bg-red {  background-color: red }
+.bg-green {  background-color: green }
+.bg-yellow {  background-color: yellow }
+
+.asserts_content {
+    display: block;
+    font-size: 75%;
+    color: #212529;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.Pass, .Fail {
+  font-weight: bold;
+  padding-right: 10px;
+
+}
+.Pass {
+  color: green;
+}
+.Fail {
+  color: red;
+}
+.inline {
+  display:inline-block;
+}

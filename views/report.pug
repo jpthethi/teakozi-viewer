@@ -1,0 +1,59 @@
+extends layout
+
+block content
+  .container
+    br
+    h3 Test Run: #{log.id}
+    div Start #{dt_fmt(log.start)} | End #{dt_fmt(log.end)}
+    div Total test cases : #{log.tests.length}
+    br
+    h4 Summary:
+    - sno=0
+    table.table.table-bordered(width="100%")
+      thead
+        th Sno
+        th Name
+        th Status
+        th Duration(ms)
+        th Steps
+      for t in log.tests
+        tr
+          td #{++sno}
+          td #{t.name}
+          td
+            .bullet("class"=t.valid?"bg-green":"bg-red")
+          td #{t.duration}
+          td #{t.steps.length}
+    h4 Details:
+    for t in log.tests
+      hr
+      .row
+        .col-1
+          .bullet("class"=t.valid?"bg-green":"bg-red")
+        .col-11
+          h4(class=t.valid?"Pass":"Fail") #{t.name}
+          div.small Start #{dt_fmt(t.start)} | End #{dt_fmt(t.end)} |  Duration: #{t.duration} ms
+      for s in t.steps
+        hr
+        .row
+          .col-1
+          .col-1
+            .bullet("class"=s.valid?"bg-green":"bg-red")
+          .col-10
+            h5(class=t.valid?"Pass":"Fail") #{s.name}
+            div
+              pre.asserts_content.inline.badge.badge-primary.mr-2(style="color:white") #{s.method}
+              pre.asserts_content.inline #{s.url}
+            div.small Start #{dt_fmt(s.start)} | End #{moment(s.end).format("DD-MMM-YY / HH:mm:ss")} |  Duration: #{s.duration} ms
+            //div #{duration_fmt(s.start,s.end)}
+            hr
+            if s.debug_prints.length > 0
+              for p in s.debug_prints
+                pre.asserts_content  #{p}
+                hr
+
+            if s.asserts.length > 0
+              for a in s.asserts
+                div
+                  .inline(class=a.valid?"Pass":"Fail") #{a.valid?"Pass":"Fail"}
+                  .inline #{a.detail}
