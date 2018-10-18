@@ -15,7 +15,7 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
 
 app.locals.moment = moment
-app.locals.dt_fmt = function(d) {return moment(d).format("DD-MM-YY HH:mm:ss")}
+app.locals.dt_fmt = function(d) {return moment(d).format("DD-MMM-YY HH:mm:ss")}
 app.locals.duration_fmt = function(d1,d2){
   let start = moment(d1);
   let end = moment(d2);
