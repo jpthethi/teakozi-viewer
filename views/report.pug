@@ -4,6 +4,8 @@ block content
   .container
     h3 Test Run: #{log.id}
     div Start #{dt_fmt(log.start)} | End #{dt_fmt(log.end)} |  Duration: #{Math.ceil(log.duration/1000)} secs
+    if log.tags
+      div Tags: #{log.tags}
     div Total test cases : #{log.tests.length}
     br
     h4 Summary:
@@ -39,6 +41,8 @@ block content
         .col-11
           h4(class=t.valid?"Pass":"Fail")
             a(name = "t" + sno) #{sno} - #{t.name}
+          if t.tags
+            div Tags: #{t.tags}
           div.small Start #{dt_fmt(t.start)} | End #{dt_fmt(t.end)} |  Duration: #{t.duration} ms
       - stno=0
       for s in t.steps
@@ -55,7 +59,6 @@ block content
               pre.asserts_content.inline.badge.badge-primary.mr-2(style="color:white") #{s.method}
               pre.asserts_content.inline #{s.url}
             div.small Start #{dt_fmt(s.start)} | End #{moment(s.end).format("DD-MMM-YY / HH:mm:ss")} |  Duration: #{s.duration} ms
-            //div #{duration_fmt(s.start,s.end)}
             hr
             if s.debug_prints.length > 0
               for p in s.debug_prints
@@ -67,3 +70,10 @@ block content
                 div
                   .inline(class=a.valid?"Pass":"Fail") #{a.valid?"Pass":"Fail"}
                   .inline #{a.detail}
+                  if(a.errDetails)
+                    div Expected:
+                    textarea.form-control #{JSON.stringify(a.errDetails.expected)}
+                    div Actual:
+                    textarea.form-control #{JSON.stringify(a.errDetails.actual)}
+                    div differencing tool :
+                      a.ml-1(href="http://www.jsondiff.com/" target="_blank") jsondiff
