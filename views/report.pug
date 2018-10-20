@@ -60,7 +60,7 @@ block content
               pre.asserts_content.inline #{s.url}
             div.small Start #{dt_fmt(s.start)} | End #{moment(s.end).format("DD-MMM-YY / HH:mm:ss")} |  Duration: #{s.duration} ms
             hr
-            if s.debug_prints.length > 0
+            if s.debug_prints!=undefined && s.debug_prints.length > 0
               for p in s.debug_prints
                 pre.asserts_content  #{p}
                 hr
