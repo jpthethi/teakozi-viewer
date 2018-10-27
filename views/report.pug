@@ -70,10 +70,13 @@ block content
                 div
                   .inline(class=a.valid?"Pass":"Fail") #{a.valid?"Pass":"Fail"}
                   .inline #{a.detail}
-                  if(a.errDetails)
-                    div Expected:
-                    textarea.form-control #{JSON.stringify(a.errDetails.expected)}
-                    div Actual:
-                    textarea.form-control #{JSON.stringify(a.errDetails.actual)}
-                    div differencing tool :
-                      a.ml-1(href="http://www.jsondiff.com/" target="_blank") jsondiff
+                  if a.errDetails
+                    if(a.errDetails.type=="object_compare")
+                      div Expected:
+                      textarea.form-control #{JSON.stringify(a.errDetails.expected)}
+                      div Actual:
+                      textarea.form-control #{JSON.stringify(a.errDetails.actual)}
+                      div differencing tool :
+                        a.ml-1(href="http://www.jsondiff.com/" target="_blank") jsondiff
+                    if(a.errDetails.type=="schema_mismatch")
+                      pre #{a.errDetails.errMessage}
