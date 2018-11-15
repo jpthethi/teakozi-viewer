@@ -4,8 +4,13 @@ block content
   .container
     h3 Test Run: #{log.id}
     div Start #{dt_fmt(log.start)} | End #{dt_fmt(log.end)} |  Duration: #{Math.ceil(log.duration/1000)} secs
-    if log.tags
-      div Tags: #{log.tags}
+    if log.all_tags
+      .badge.badge-success.mr-2.tg Toggle
+      for x, tg in log.all_tags
+        .badge.badge-primary.mr-2.tg #{tg} #{x.filter(r=>{return r.valid}).length}/#{x.length}
+    else
+      p no tags
+
     div Total test cases : #{log.tests.length}
     br
     h4 Summary:
@@ -18,65 +23,96 @@ block content
         th Duration(ms)
         th Steps
         th TestFile
-        th LogFile
       for t in log.tests
-        tr
+        tr.summary_row(data-tags = t.tags)
           td #{++sno}
           td
             a(href="#t"+sno) #{t.name}
+            if t.tags
+              div #{t.tags}
+
           td
             .bullet("class"=t.valid?"bg-green":"bg-red")
           td #{t.duration}
           td #{t.steps.length}
           td #{t.test_file}
-          td #{t.logfile}
     h4 Details:
     - sno=0
     for t in log.tests
-      - sno++
-      hr
-      .row
-        .col-1
-          .bullet("class"=t.valid?"bg-green":"bg-red")
-        .col-11
-          h4(class=t.valid?"Pass":"Fail")
-            a(name = "t" + sno) #{sno} - #{t.name}
-          if t.tags
-            div Tags: #{t.tags}
-          div.small Start #{dt_fmt(t.start)} | End #{dt_fmt(t.end)} |  Duration: #{t.duration} ms
-      - stno=0
-      for s in t.steps
-        - stno++
+      .summary_row(data-tags = t.tags)
+        - sno++
         hr
         .row
           .col-1
-          .col-1
-            .bullet("class"=s.valid?"bg-green":"bg-red")
-          .col-10
-            h5(class=s.valid?"Pass":"Fail")
-              a(name="t"+sno+"s"+ stno) #{sno}.#{stno} - #{s.name}
-            div
-              pre.asserts_content.inline.badge.badge-primary.mr-2(style="color:white") #{s.method}
-              pre.asserts_content.inline #{s.url}
-            div.small Start #{dt_fmt(s.start)} | End #{moment(s.end).format("DD-MMM-YY / HH:mm:ss")} |  Duration: #{s.duration} ms
-            hr
-            if s.debug_prints!=undefined && s.debug_prints.length > 0
-              for p in s.debug_prints
-                pre.asserts_content  #{p}
-                hr
+            .bullet("class"=t.valid?"bg-green":"bg-red")
+          .col-11
+            h4(class=t.valid?"Pass":"Fail")
+              a(name = "t" + sno) #{sno} - #{t.name}
+            if t.tags
+              div Tags: #{t.tags}
+            div.small Start #{dt_fmt(t.start)} | End #{dt_fmt(t.end)} |  Duration: #{t.duration} ms
+        - stno=0
+        for s in t.steps
+          - stno++
+          hr
+          .row
+            .col-1
+            .col-1
+              .bullet("class"=s.valid?"bg-green":"bg-red")
+            .col-10
+              h5(class=s.valid?"Pass":"Fail")
+                a(name="t"+sno+"s"+ stno) #{sno}.#{stno} - #{s.name}
+              div
+                pre.asserts_content.inline.badge.badge-primary.mr-2(style="color:white") #{s.method}
+                pre.asserts_content.inline #{s.url}
+              div.small Start #{dt_fmt(s.start)} | End #{moment(s.end).format("DD-MMM-YY / HH:mm:ss")} |  Duration: #{s.duration} ms
+              hr
+              if s.debug_prints!=undefined && s.debug_prints.length > 0
+                for p in s.debug_prints
+                  pre.asserts_content  #{p}
+                  hr
 
-            if s.asserts.length > 0
-              for a in s.asserts
-                div
-                  .inline(class=a.valid?"Pass":"Fail") #{a.valid?"Pass":"Fail"}
-                  .inline #{a.detail}
-                  if a.errDetails
-                    if(a.errDetails.type=="object_compare")
-                      div Expected:
-                      textarea.form-control #{JSON.stringify(a.errDetails.expected)}
-                      div Actual:
-                      textarea.form-control #{JSON.stringify(a.errDetails.actual)}
-                      div differencing tool :
-                        a.ml-1(href="http://www.jsondiff.com/" target="_blank") jsondiff
-                    if(a.errDetails.type=="schema_mismatch")
-                      pre #{a.errDetails.errMessage}
+              if s.asserts && s.asserts.length > 0
+                for a in s.asserts
+                  div
+                    .inline(class=a.valid?"Pass":"Fail") #{a.valid?"Pass":"Fail"}
+                    .inline #{a.detail}
+                    if a.errDetails
+                      if(a.errDetails.type=="object_compare")
+                        div Expected:
+                        textarea.form-control #{JSON.stringify(a.errDetails.expected)}
+                        div Actual:
+                        textarea.form-control #{JSON.stringify(a.errDetails.actual)}
+                        div differencing tool :
+                          a.ml-1(href="http://www.jsondiff.com/" target="_blank") jsondiff
+                      if(a.errDetails.type=="schema_mismatch")
+                        pre #{a.errDetails.errMessage}
+
+  style.
+    .hidden {display:none}
+  script.
+    $(".tg").click(function(){
+      if($(this).hasClass("badge-primary")) {$(this).removeClass("badge-primary"); $(this).addClass("badge-secondary") }
+      else if($(this).hasClass("badge-secondary")) {$(this).removeClass("badge-secondary"); $(this).addClass("badge-primary") }
+
+      if(this.innerHTML=='Toggle'){
+        $(".tg").toggleClass("badge-primary");$(".tg").toggleClass("badge-secondary")
+      }
+
+      var on_guys = []
+      $(".tg.badge-primary").each(function(x,tg){
+        on_guys.push(tg.innerHTML)
+      })
+      $(".summary_row").addClass("hidden")
+
+      $(".summary_row").each(function(i,r){
+        var row_tags = $(this).data("tags").split(",")
+        var hide = true;
+        var that = this
+        on_guys.forEach(function(o){
+          o = o.split(" ")[0];
+          if(row_tags.map(r=>{return r.trim()}).indexOf(o)>-1) {$(that).removeClass("hidden")}
+        })
+      })
+
+    })
