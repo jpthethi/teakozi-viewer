@@ -14,6 +14,10 @@ var app = express();
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
 
+app.use(express.json({limit: '50mb'}));
+app.use(express.urlencoded({limit: '50mb'}));
+
+
 app.locals.moment = moment
 app.locals.dt_fmt = function(d) {return moment(d).format("DD-MMM-YY HH:mm:ss")}
 app.locals.duration_fmt = function(d1,d2){
